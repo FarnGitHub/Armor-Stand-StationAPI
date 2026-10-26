@@ -71,18 +71,19 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
         int fakeHP = health;
         fakeHP -= amount;
 
-        if (fakeHP <= 1F) {
-            breakArmorStand();
+        if (fakeHP <= 1) {
+            breakArmorStand(true);
         } else {
             this.world.playSound(this, this.getHurtSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
             this.health -= amount;
         }
     }
 
-    public void breakArmorStand() {
+    public void breakArmorStand(boolean markDead) {
         this.world.playSound(this, this.getDeathSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
         this.dropItems();
-        this.markDead();
+        if(markDead)
+            this.markDead();
     }
 
     private void providerEntityId(MessagePacket msg) {
@@ -99,7 +100,7 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
         }
 
         if(source instanceof PlayerEntity) {
-            this.breakArmorStand();
+            this.breakArmorStand(true);
         } else {
             this.damageArmorStand(amount);
         }

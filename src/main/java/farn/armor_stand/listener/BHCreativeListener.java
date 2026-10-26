@@ -1,4 +1,4 @@
-package farn.armor_stand.client;
+package farn.armor_stand.listener;
 
 import farn.armor_stand.ArmorStandMain;
 import net.mine_diver.unsafeevents.listener.EventListener;

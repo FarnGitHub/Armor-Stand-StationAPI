@@ -22,7 +22,10 @@
       "farn.armor_stand.ArmorStandMain"
     ],
     "bhcreative:event_bus": [
-      "farn.armor_stand.client.BHCreativeListener"
+      "farn.armor_stand.listener.BHCreativeListener"
+    ],
+    "armor_stand:event_bus": [
+      "farn.armor_stand.listener.MapItemToSlotListener"
     ]
   },
   "depends": {
