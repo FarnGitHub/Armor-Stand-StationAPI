@@ -7,17 +7,21 @@ import farn.armor_stand.world.ArmorStandItem;
 import farn.armor_stand.world.inventory.ArmorStandGuiHandler;
 import farn.armor_stand.world.inventory.ArmorStandScreenHandler;
 import net.fabricmc.loader.api.FabricLoader;
+import net.glasslauncher.mods.alwaysmoreitems.registry.RecipeRegistry;
 import net.glasslauncher.mods.gcapi3.api.ConfigRoot;
 import net.mine_diver.unsafeevents.listener.EventListener;
 import net.mine_diver.unsafeevents.listener.ListenerPriority;
 import net.minecraft.block.Block;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.modificationstation.stationapi.api.event.entity.EntityRegisterEvent;
+import net.modificationstation.stationapi.api.event.recipe.RecipeRegisterEvent;
 import net.modificationstation.stationapi.api.event.registry.GuiHandlerRegistryEvent;
 import net.modificationstation.stationapi.api.event.registry.ItemRegistryEvent;
 import net.modificationstation.stationapi.api.event.registry.MobHandlerRegistryEvent;
 import net.modificationstation.stationapi.api.mod.entrypoint.Entrypoint;
+import net.modificationstation.stationapi.api.recipe.CraftingRegistry;
 import net.modificationstation.stationapi.api.util.Identifier;
 import net.modificationstation.stationapi.api.util.Namespace;
 
@@ -50,6 +54,18 @@ public class ArmorStandMain {
     @EventListener
     public void registerScreenHandler(GuiHandlerRegistryEvent event) {
         event.register(id("armor_stand_screen"), ArmorStandGuiHandler.INSTANCE);
+    }
+
+    @EventListener
+    public void registerRecipe(RecipeRegisterEvent event) {
+        if(event.recipeId == RecipeRegisterEvent.Vanilla.CRAFTING_SHAPED.type()) {
+            CraftingRegistry.addShapedRecipe(
+                    new ItemStack(ARMOR_STAND_ITEM, 1),
+                    "xxx", " x ", "xyx",
+                    'x', Item.STICK,
+                    'y', new ItemStack(Block.SLAB, 1, 0)
+            );
+        }
     }
 
     @EventListener(priority = ListenerPriority.HIGHEST)

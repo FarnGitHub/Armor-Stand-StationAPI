@@ -19,6 +19,9 @@
     ],
     "gcapi3": [
       "farn.armor_stand.ArmorStandMain"
+    ],
+    "bhcreative:event_bus": [
+      "farn.armor_stand.client.BHCreativeListener"
     ]
   },
   "depends": {
