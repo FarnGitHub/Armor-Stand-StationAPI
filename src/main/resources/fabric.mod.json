@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "armor_stand",
+  "version": "${version}",
+
+  "name": "Armor Stand",
+  "description": "Mostly a backport of modern mc's Armorstand",
+  "authors": [
+    "farnfarn02"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "farn.armor_stand.ArmorStandMain"
+    ],
+    "stationapi:event_bus_client": [
+      "farn.armor_stand.client.ArmorStandClient"
+    ],
+    "gcapi3": [
+      "farn.armor_stand.ArmorStandMain"
+    ]
+  },
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "stationapi": "*",
+    "gcapi3": "*"
+  }
+}

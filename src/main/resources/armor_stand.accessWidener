@@ -1,0 +1,10 @@
+classTweaker v1 named
+
+accessible field net/minecraft/client/render/entity/PlayerEntityRenderer armorTextureNames [Ljava/lang/String;
+accessible field net/minecraft/client/Minecraft INSTANCE Lnet/minecraft/client/Minecraft;
+accessible field net/minecraft/client/model/ModelPart corners [Lnet/minecraft/client/model/Vertex;
+accessible field net/minecraft/client/model/ModelPart faces [Lnet/minecraft/client/model/Quad;
+accessible field net/minecraft/client/model/ModelPart u I
+accessible field net/minecraft/client/model/ModelPart v I
+accessible field net/minecraft/screen/slot/Slot index I
+accessible field net/minecraft/screen/slot/Slot inventory Lnet/minecraft/inventory/Inventory;
