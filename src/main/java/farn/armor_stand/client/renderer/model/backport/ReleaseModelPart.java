@@ -1,15 +1,15 @@
-package farn.armor_stand.client.renderer.model;
+package farn.armor_stand.client.renderer.model.backport;
 
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.model.Quad;
 import net.minecraft.client.model.Vertex;
 
 public class ReleaseModelPart extends ModelPart {
-    public ArmorStandModel armorStand;
+    public TextureSize texSize;
 
-    public ReleaseModelPart(ArmorStandModel armor, int u, int v) {
+    public ReleaseModelPart(TextureSize armor, int u, int v) {
         super(u, v);
-        this.armorStand = armor;
+        this.texSize = armor;
     }
 
     public void addCuboid(float x, float y, float z, int sizeX, int sizeY, int sizeZ, float dilation) {
@@ -46,12 +46,12 @@ public class ReleaseModelPart extends ModelPart {
         this.corners[5] = v6;
         this.corners[6] = v7;
         this.corners[7] = v8;
-        this.faces[0] = new TexturedQuad(new Vertex[]{v6, v2, v3, v7}, this.u + sizeZ + sizeX, this.v + sizeZ, this.u + sizeZ + sizeX + sizeZ, this.v + sizeZ + sizeY, this.armorStand.texWidth, this.armorStand.texHeight);
-        this.faces[1] = new TexturedQuad(new Vertex[]{v1, v5, v8, v4}, this.u, this.v + sizeZ, this.u + sizeZ, this.v + sizeZ + sizeY, this.armorStand.texWidth, this.armorStand.texHeight);
-        this.faces[2] = new TexturedQuad(new Vertex[]{v6, v5, v1, v2}, this.u + sizeZ, this.v, this.u + sizeZ + sizeX, this.v + sizeZ, this.armorStand.texWidth, this.armorStand.texHeight);
-        this.faces[3] = new TexturedQuad(new Vertex[]{v3, v4, v8, v7}, this.u + sizeZ + sizeX, this.v, this.u + sizeZ + sizeX + sizeX, this.v + sizeZ, this.armorStand.texWidth, this.armorStand.texHeight);
-        this.faces[4] = new TexturedQuad(new Vertex[]{v2, v1, v4, v3}, this.u + sizeZ, this.v + sizeZ, this.u + sizeZ + sizeX, this.v + sizeZ + sizeY, this.armorStand.texWidth, this.armorStand.texHeight);
-        this.faces[5] = new TexturedQuad(new Vertex[]{v5, v6, v7, v8}, this.u + sizeZ + sizeX + sizeZ, this.v + sizeZ, this.u + sizeZ + sizeX + sizeZ + sizeX, this.v + sizeZ + sizeY, this.armorStand.texWidth, this.armorStand.texHeight);
+        this.faces[0] = new TexturedQuad(new Vertex[]{v6, v2, v3, v7}, this.u + sizeZ + sizeX, this.v + sizeZ, this.u + sizeZ + sizeX + sizeZ, this.v + sizeZ + sizeY, this.texSize.getTextureWidth(), this.texSize.getTextureHeight());
+        this.faces[1] = new TexturedQuad(new Vertex[]{v1, v5, v8, v4}, this.u, this.v + sizeZ, this.u + sizeZ, this.v + sizeZ + sizeY, this.texSize.getTextureWidth(), this.texSize.getTextureHeight());
+        this.faces[2] = new TexturedQuad(new Vertex[]{v6, v5, v1, v2}, this.u + sizeZ, this.v, this.u + sizeZ + sizeX, this.v + sizeZ, this.texSize.getTextureWidth(), this.texSize.getTextureHeight());
+        this.faces[3] = new TexturedQuad(new Vertex[]{v3, v4, v8, v7}, this.u + sizeZ + sizeX, this.v, this.u + sizeZ + sizeX + sizeX, this.v + sizeZ, this.texSize.getTextureWidth(), this.texSize.getTextureHeight());
+        this.faces[4] = new TexturedQuad(new Vertex[]{v2, v1, v4, v3}, this.u + sizeZ, this.v + sizeZ, this.u + sizeZ + sizeX, this.v + sizeZ + sizeY, this.texSize.getTextureWidth(), this.texSize.getTextureHeight());
+        this.faces[5] = new TexturedQuad(new Vertex[]{v5, v6, v7, v8}, this.u + sizeZ + sizeX + sizeZ, this.v + sizeZ, this.u + sizeZ + sizeX + sizeZ + sizeX, this.v + sizeZ + sizeY, this.texSize.getTextureWidth(), this.texSize.getTextureHeight());
         if (this.mirror)
             for(Quad quad : this.faces)
                 quad.flip();

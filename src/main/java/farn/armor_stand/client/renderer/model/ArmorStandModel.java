@@ -1,15 +1,15 @@
 package farn.armor_stand.client.renderer.model;
 
 
-public class ArmorStandModel extends ArmorStandArmorModel {
+import farn.armor_stand.client.renderer.model.backport.ReleaseModelPart;
+import farn.armor_stand.client.renderer.model.backport.TextureSize;
+
+public class ArmorStandModel extends ArmorStandArmorModel implements TextureSize {
 
 	public ReleaseModelPart standRightSide;
 	public ReleaseModelPart standLeftSide;
 	public ReleaseModelPart standWaist;
 	public ReleaseModelPart standBase;
-
-    public int texWidth = 64;
-    public int texHeight = 64;
 
 	public ArmorStandModel() {
 		this(0.0F);
@@ -79,5 +79,15 @@ public class ArmorStandModel extends ArmorStandArmorModel {
 		standLeftSide.render(scale);
 		standWaist.render(scale);
 		standBase.render(scale);
+	}
+
+	@Override
+	public int getTextureWidth() {
+		return 64;
+	}
+
+	@Override
+	public int getTextureHeight() {
+		return 64;
 	}
 }
