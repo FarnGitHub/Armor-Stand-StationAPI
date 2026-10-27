@@ -1,21 +1,15 @@
 package farn.armor_stand;
 
 import farn.armor_stand.config.Config;
-import farn.armor_stand.event.MapItemToSlotEvent;
 import farn.armor_stand.world.ArmorStandEntity;
 import farn.armor_stand.world.ArmorStandItem;
 import farn.armor_stand.world.inventory.ArmorStandGuiHandler;
-import farn.armor_stand.world.inventory.ArmorStandScreenHandler;
 import net.fabricmc.loader.api.FabricLoader;
-import net.glasslauncher.mods.alwaysmoreitems.registry.RecipeRegistry;
 import net.glasslauncher.mods.gcapi3.api.ConfigRoot;
 import net.mine_diver.unsafeevents.listener.EventListener;
-import net.mine_diver.unsafeevents.listener.ListenerPriority;
 import net.minecraft.block.Block;
-import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.modificationstation.stationapi.api.StationAPI;
 import net.modificationstation.stationapi.api.event.entity.EntityRegisterEvent;
 import net.modificationstation.stationapi.api.event.mod.InitEvent;
 import net.modificationstation.stationapi.api.event.recipe.RecipeRegisterEvent;

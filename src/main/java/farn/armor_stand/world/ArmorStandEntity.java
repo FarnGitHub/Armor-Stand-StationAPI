@@ -12,14 +12,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.modificationstation.stationapi.api.StationAPI;
 import net.modificationstation.stationapi.api.gui.screen.container.GuiHelper;
 import net.modificationstation.stationapi.api.network.packet.MessagePacket;
+import net.modificationstation.stationapi.api.network.packet.PacketHelper;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
 import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
 import net.modificationstation.stationapi.api.util.Identifier;
+import net.modificationstation.stationapi.api.util.SideUtil;
 
 import java.util.Arrays;
 
@@ -39,7 +42,7 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
         this.setPosition(x, y, z);
     }
 
-    public boolean interact(PlayerEntity player, Vec3d hitPos) {
+    public void interact(PlayerEntity player, double yHit) {
         if (!world.isRemote) {
             ItemStack held = player.getHand();
             byte armorSlot = StationAPI.EVENT_BUS.post(
@@ -48,23 +51,21 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
 
 
             byte slot = 0;
-            double yHit = hitPos.y;
 
-            if (yHit >= 0D && yHit < 0.3D && inventory.getStack(1) != null)
+            if (yHit < 0.55D && inventory.getStack(1) != null)
                 slot = 1;
-            else if (yHit >= 0.6D && yHit < 1.6D && inventory.getStack(3) != null)
+            else if (yHit >= 0.9D && yHit < 1.6D && inventory.getStack(3) != null)
                 slot = 3;
-            else if (yHit >= 0.3D && yHit < 1.05D && inventory.getStack(2) != null)
+            else if (yHit >= 0.4D && yHit < 1.2D && inventory.getStack(2) != null)
                 slot = 2;
             else if (yHit >= 1.6D && inventory.getStack(4) != null)
                 slot = 4;
 
             if (held != null)
-                return inventory.putEquipment(player, armorSlot);
+                inventory.putEquipment(player, armorSlot);
             else if (inventory.getStack(slot) != null)
-                return inventory.putEquipment(player, slot);
+                inventory.putEquipment(player, slot);
         }
-        return true;
     }
 
     private void damageArmorStand(int amount) {
@@ -123,24 +124,25 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
 
     @Override
     public boolean interact(PlayerEntity player) {
+        if(world.isRemote) return true;
         if(ArmorStandMain.isGuiMode()) {
-            if(!world.isRemote)
-                GuiHelper.openGUI(
-                        player,
-                        ArmorStandMain.id("armor_stand_screen"),
-                        inventory,
-                        new ArmorStandScreenHandler(player.inventory, inventory),
-                        this::providerEntityId
-                );
-            return true;
+            GuiHelper.openGUI(
+                    player,
+                    ArmorStandMain.id("armor_stand_screen"),
+                    inventory,
+                    new ArmorStandScreenHandler(player.inventory, inventory),
+                    this::providerEntityId
+            );
         } else {
-            float distance = player.getDistance(this);
             Vec3d origin = Vec3d.createCached(player.x, player.y + player.getEyeHeight(), player.z);
+            Vec3d end = Vec3d.createCached(this.x, this.boundingBox.minY, this.z);
+            double distance = origin.distanceTo(end);
             Vec3d lookV = player.getLookVector();
-            Vec3d hitV = origin.add(lookV.x * distance, lookV.y * distance, lookV.z * distance);
-            Vec3d hitDiff = Vec3d.createCached(hitV.x - this.x, hitV.y - this.y, hitV.z - this.z);
-            return interact(player, hitDiff);
+            Vec3d hitVec  = origin.add(lookV.x * distance, lookV.y * distance, lookV.z * distance);
+            HitResult result = this.boundingBox.raycast(origin, hitVec);
+            interact(player, result != null ? result.pos.y - end.y : 0D);
         }
+        return true;
     }
 
     @Environment(EnvType.CLIENT)

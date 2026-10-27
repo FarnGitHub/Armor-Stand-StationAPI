@@ -113,6 +113,6 @@ public class ArmorStandInventory implements Inventory {
 
     @Override
     public boolean canPlayerUse(PlayerEntity player) {
-        return entity != null && player.getSquaredDistance(entity) < 64;
+        return entity != null && entity.isAlive() && player.getSquaredDistance(entity) < 64;
     }
 }
