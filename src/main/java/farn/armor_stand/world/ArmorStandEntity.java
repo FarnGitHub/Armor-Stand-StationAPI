@@ -18,11 +18,9 @@ import net.minecraft.world.World;
 import net.modificationstation.stationapi.api.StationAPI;
 import net.modificationstation.stationapi.api.gui.screen.container.GuiHelper;
 import net.modificationstation.stationapi.api.network.packet.MessagePacket;
-import net.modificationstation.stationapi.api.network.packet.PacketHelper;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
 import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
 import net.modificationstation.stationapi.api.util.Identifier;
-import net.modificationstation.stationapi.api.util.SideUtil;
 
 import java.util.Arrays;
 
@@ -72,19 +70,17 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
         int fakeHP = health;
         fakeHP -= amount;
 
-        if (fakeHP <= 1) {
-            breakArmorStand(true);
-        } else {
+        if (fakeHP <= 1)
+            breakArmorStand();
+        else {
             this.world.playSound(this, this.getHurtSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
             this.health -= amount;
         }
     }
 
-    public void breakArmorStand(boolean markDead) {
+    public void breakArmorStand() {
         this.world.playSound(this, this.getDeathSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-        this.dropItems();
-        if(markDead)
-            this.markDead();
+        this.markDead();
     }
 
     private void providerEntityId(MessagePacket msg) {
@@ -100,18 +96,16 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
             return false;
         }
 
-        if(source instanceof PlayerEntity) {
-            this.breakArmorStand(true);
-        } else {
+        if(source instanceof PlayerEntity)
+            this.breakArmorStand();
+        else
             this.damageArmorStand(amount);
-        }
 
         return false;
     }
 
     @Override
-    protected void dropItems() {
-        super.dropItems();
+    public void markDead() {
         this.dropItem(ArmorStandMain.ARMOR_STAND_ITEM.id, 1);
         for(int index = 0; index < inventory.size(); index++) {
             ItemStack stack = inventory.getStack(index);
@@ -120,6 +114,7 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
                 inventory.setStack(index, null);
             }
         }
+        super.markDead();
     }
 
     @Override
