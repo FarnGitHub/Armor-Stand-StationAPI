@@ -1,10 +1,12 @@
 package farn.armor_stand.world;
 
 import farn.armor_stand.ArmorStandMain;
+import farn.armor_stand.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -15,6 +17,7 @@ import net.modificationstation.stationapi.api.template.item.TemplateItem;
 import net.modificationstation.stationapi.api.util.math.Direction;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ArmorStandItem extends TemplateItem {
 
@@ -28,9 +31,7 @@ public class ArmorStandItem extends TemplateItem {
 		final int x;
 		final int y;
 		final int z;
-		int block = world.getBlockId(clickX, clickY, clickZ);
-		if (block > 0 && world.canPlace(block, clickX, clickY, clickZ, true, side)) {
-			side = 0;
+		if (Util.canPlaceAt(world, clickX, clickY, clickZ)) {
 			x = clickX;
 			y = clickY;
 			z = clickZ;
@@ -40,13 +41,12 @@ public class ArmorStandItem extends TemplateItem {
 			y = clickY + direction.getOffsetY();
 			z = clickZ + direction.getOffsetZ();
 		}
-		ItemPlacementContext context = new ItemPlacementContext(player, stack, new HitResult(clickX, clickY, clickZ, side, Vec3d.createCached(x, y, z)));
-		ItemPlacementContext contextAbove = ItemPlacementContext.offset(context, context.getBlockPos(), Direction.UP);
-		boolean cantPlace = !world.isAir(x, y, z) && !world.getBlockState(x,y,z).canReplace(context);
-		cantPlace |= !world.isAir(x, y + 1, z) && !world.getBlockState(x, y + 1, z).canReplace(contextAbove);
 
-		if (cantPlace) return false;
+		if(!(Util.canPlaceAt(world, x, y, z) && Util.canPlaceAt(world, x, y + 1, z))) {
+			return false;
+		}
 
+		@SuppressWarnings("unchecked")
 		List<Entity> list = world.getEntities(null, Box.create(x, y, z, x + 1.0D, y + 2.0D, z + 1.0D));
 
 		if (list.isEmpty()) {
@@ -54,28 +54,14 @@ public class ArmorStandItem extends TemplateItem {
 				world.setBlock(x, y, z, 0);
 				world.setBlock(x, y + 1, z, 0);
 				ArmorStandEntity stand = new ArmorStandEntity(world, x + 0.5D, y, z + 0.5D);
-				float f3 = MathHelper.floor((wrapAngleTo180_float(player.yaw - 180.0F) + 22.5F) / 45.0F) * 45.0F;
-				stand.setPositionAndAnglesKeepPrevAngles(x + 0.5D, y, z + 0.5D, f3, 0.0F);
+				float angle = MathHelper.floor((Util.wrapAngle(player.yaw - 180.0F) + 22.5F) / 45.0F) * 45.0F;
+				stand.setPositionAndAnglesKeepPrevAngles(x + 0.5D, y, z + 0.5D, angle, 0.0F);
 				world.spawnEntity(stand);
 			}
+			world.playSound(x + 0.5D, y + 0.5D, z + 0.5D, Block.STONE_SOUND_GROUP.getSound(), 1.0F, 1.0F);
 			--stack.count;
+			return true;
 		}
-		return list.isEmpty();
+		return false;
 	}
-
-	public static float wrapAngleTo180_float(float value)
-	{
-		value %= 360.0F;
-
-		if (value >= 180.0F) {
-			value -= 360.0F;
-		}
-
-		if (value < -180.0F) {
-			value += 360.0F;
-		}
-
-		return value;
-	}
-
 }

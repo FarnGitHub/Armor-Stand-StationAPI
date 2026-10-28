@@ -2,8 +2,8 @@ package farn.armor_stand.world;
 
 import farn.armor_stand.ArmorStandMain;
 import farn.armor_stand.event.MapItemToSlotEvent;
+import farn.armor_stand.util.Util;
 import farn.armor_stand.world.inventory.ArmorStandInventory;
-import farn.armor_stand.world.inventory.ArmorStandScreenHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
@@ -16,13 +16,11 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.modificationstation.stationapi.api.StationAPI;
-import net.modificationstation.stationapi.api.gui.screen.container.GuiHelper;
-import net.modificationstation.stationapi.api.network.packet.MessagePacket;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
 import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
 import net.modificationstation.stationapi.api.util.Identifier;
 
-import java.util.Arrays;
+import java.util.Optional;
 
 @HasTrackingParameters(trackingDistance = 160, updatePeriod = 3)
 public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvider {
@@ -40,7 +38,7 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
         this.setPosition(x, y, z);
     }
 
-    public void interact(PlayerEntity player, double yHit) {
+    public boolean interact(PlayerEntity player, double yHit) {
         if (!world.isRemote) {
             ItemStack held = player.getHand();
             byte armorSlot = StationAPI.EVENT_BUS.post(
@@ -50,7 +48,7 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
 
             byte slot = 0;
 
-            if (yHit < 0.55D && inventory.getStack(1) != null)
+            if (yHit > 0.1D && yHit < 0.55D && inventory.getStack(1) != null)
                 slot = 1;
             else if (yHit >= 0.9D && yHit < 1.6D && inventory.getStack(3) != null)
                 slot = 3;
@@ -60,10 +58,11 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
                 slot = 4;
 
             if (held != null)
-                inventory.putEquipment(player, armorSlot);
+                return inventory.putEquipment(player, armorSlot);
             else if (inventory.getStack(slot) != null)
-                inventory.putEquipment(player, slot);
+                return inventory.putEquipment(player, slot);
         }
+        return false;
     }
 
     private void damageArmorStand(int amount) {
@@ -71,30 +70,23 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
         fakeHP -= amount;
 
         if (fakeHP <= 1)
-            breakArmorStand();
+            this.breakArmorStand();
         else {
+            this.world.broadcastEntityEvent(this, (byte)0);
             this.world.playSound(this, this.getHurtSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
             this.health -= amount;
         }
     }
 
     public void breakArmorStand() {
+        if(!world.isRemote) this.world.broadcastEntityEvent(this, (byte)1);
         this.world.playSound(this, this.getDeathSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
         this.markDead();
     }
 
-    private void providerEntityId(MessagePacket msg) {
-        if(msg.ints == null) msg.ints = new int[1];
-        else msg.ints = Arrays.copyOf(msg.ints, msg.ints.length + 1);
-        msg.ints[msg.ints.length - 1] = this.id;
-    }
-
     @Override
     public boolean damage(Entity source, int amount) {
-        if(world.isRemote) {
-            this.world.playSound(this, this.getHurtSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-            return false;
-        }
+        if(world.isRemote) return false;
 
         if(source instanceof PlayerEntity)
             this.breakArmorStand();
@@ -106,12 +98,14 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
 
     @Override
     public void markDead() {
-        this.dropItem(ArmorStandMain.ARMOR_STAND_ITEM.id, 1);
-        for(int index = 0; index < inventory.size(); index++) {
-            ItemStack stack = inventory.getStack(index);
-            if(stack != null) {
-                this.dropItem(stack, 0.0F);
-                inventory.setStack(index, null);
+        if(!world.isRemote) {
+            this.dropItem(ArmorStandMain.ARMOR_STAND_ITEM.id, 1);
+            for(int index = 0; index < inventory.size(); index++) {
+                ItemStack stack = inventory.getStack(index);
+                if(stack != null) {
+                    this.dropItem(stack, 0.0F);
+                    inventory.setStack(index, null);
+                }
             }
         }
         super.markDead();
@@ -119,25 +113,16 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
 
     @Override
     public boolean interact(PlayerEntity player) {
-        if(world.isRemote) return true;
-        if(ArmorStandMain.isGuiMode()) {
-            GuiHelper.openGUI(
-                    player,
-                    ArmorStandMain.id("armor_stand_screen"),
-                    inventory,
-                    new ArmorStandScreenHandler(player.inventory, inventory),
-                    this::providerEntityId
-            );
+        if (world.isRemote) return true;
+        else if(ArmorStandMain.isGuiMode()) {
+            return Util.openScreen(player, this);
         } else {
-            Vec3d origin = Vec3d.createCached(player.x, player.y + player.getEyeHeight(), player.z);
-            Vec3d end = Vec3d.createCached(this.x, this.boundingBox.minY, this.z);
-            double distance = origin.distanceTo(end);
-            Vec3d lookV = player.getLookVector();
-            Vec3d hitVec  = origin.add(lookV.x * distance, lookV.y * distance, lookV.z * distance);
-            HitResult result = this.boundingBox.raycast(origin, hitVec);
-            interact(player, result != null ? result.pos.y - end.y : 0D);
+            float yOffset = player.getEyeHeight();
+            if(Util.getEnvType() == EnvType.SERVER) yOffset += 0.12F;
+            Vec3d hit = Util.getHitVector(player, this, 32D, yOffset);
+            double yDiff = hit != null ? hit.y - this.boundingBox.minY : 0D;
+            return interact(player, yDiff);
         }
-        return true;
     }
 
     @Environment(EnvType.CLIENT)
@@ -237,5 +222,14 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
     @Override
     public Identifier getHandlerIdentifier() {
         return ArmorStandMain.id("armor_stand");
+    }
+
+    @Environment(EnvType.CLIENT)
+    public void processServerEntityStatus(byte status) {
+        if (status == 0) {
+            this.world.playSound(this, this.getHurtSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+        } else if (status == 1) {
+            this.breakArmorStand();
+        }
     }
 }

@@ -38,7 +38,7 @@ public class ArmorStandScreen extends HandledScreen {
 		int xStart = this.width - this.backgroundWidth >> 1;
 		int yStart = this.height - this.backgroundHeight >> 1;
 		this.drawTexture(xStart, yStart, 0, 0,this.backgroundWidth, this.backgroundHeight);
-		drawArmorStandEntity(xStart, yStart);
+		this.drawArmorStandEntity(xStart, yStart);
 	}
 
 	protected void drawForeground() {
