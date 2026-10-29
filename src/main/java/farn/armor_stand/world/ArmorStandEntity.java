@@ -232,4 +232,9 @@ public class ArmorStandEntity extends LivingEntity implements MobSpawnDataProvid
             this.breakArmorStand();
         }
     }
+
+    @SuppressWarnings("unused")
+    public boolean nametag_canPutNameTag() {
+        return false;
+    }
 }
